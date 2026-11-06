@@ -1,0 +1,6 @@
+.superpowers/
+**/bin/
+**/obj/
+**/node_modules/
+src/Umbraco.Community.NodeIcons/wwwroot/
+artifacts/
