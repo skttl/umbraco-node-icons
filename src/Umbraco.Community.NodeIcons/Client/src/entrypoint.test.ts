@@ -16,7 +16,7 @@ it('registers a document-only sign for the server custom-icon flag', () => {
   (onInit as UmbEntryPointOnInit)({} as never, registry as never);
   expect(registry.register).toHaveBeenCalledWith(expect.objectContaining({
     type: 'entitySign', kind: 'icon', forEntityTypes: ['document'],
-    forEntityFlags: ['NodeIcons.CustomIcon'], element: expect.any(Function),
+    forEntityFlags: ['NodeIcons.CustomIcon'], element: expect.any(Function), api: expect.any(Function),
   }));
 });
 

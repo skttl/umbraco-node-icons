@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from 'vitest';
+import { beforeEach, expect, it, onTestFinished, vi } from 'vitest';
 import type { TemplateResult } from '@umbraco-cms/backoffice/external/lit';
 
 const boundary = vi.hoisted(() => ({
@@ -18,7 +18,8 @@ vi.mock('@umbraco-cms/backoffice/document-type', () => ({
   UmbDocumentTypeItemRepository: class { requestItems = boundary.requestItems; },
 }));
 vi.stubGlobal('customElements', { define: vi.fn() });
-const { NodeIconsOriginalIconSign } = await import('./original-icon-sign');
+const signModule = await import('./original-icon-sign');
+const { NodeIconsOriginalIconSign } = signModule;
 
 beforeEach(() => {
   boundary.context = undefined;
@@ -39,19 +40,20 @@ function renderedIcon(element: InstanceType<typeof NodeIconsOriginalIconSign>) {
   return template?.values[0];
 }
 function deferred() {
-  let resolve!: (result: { data: { icon: string }[] }) => void;
-  const promise = new Promise<{ data: { icon: string }[] }>((done) => { resolve = done; });
+  let resolve!: (result: { data: { icon: string; name?: string }[] }) => void;
+  const promise = new Promise<{ data: { icon: string; name?: string }[] }>((done) => { resolve = done; });
   return { promise, resolve };
 }
 
 it('renders the original document-type icon from the native repository with an accessible label', async () => {
-  boundary.requestItems.mockResolvedValue({ data: [{ unique: 'type-a', icon: 'icon-home color-blue' }] });
+  boundary.requestItems.mockResolvedValue({ data: [{ unique: 'type-a', name: 'Article', icon: 'icon-home color-blue' }] });
   const element = mount();
   await change('type-a');
   expect(boundary.requestItems).toHaveBeenCalledWith(['type-a']);
   expect(renderedIcon(element)).toBe('icon-home color-blue');
   const template = element.render() as TemplateResult;
-  expect(template.strings.join('')).toContain('aria-label="Original document type icon"');
+  expect(template.strings.join('')).toContain('aria-label=');
+  expect(template.values[1]).toBe('Article');
 });
 
 it('clears the previous icon immediately when document type changes', async () => {
@@ -126,4 +128,92 @@ it('ignores a pending result after the item is cleared', async () => {
   pending.resolve({ data: [{ icon: 'icon-home' }] });
   await loading;
   expect(renderedIcon(element)).toBeUndefined();
+});
+
+function tooltip(element: InstanceType<typeof NodeIconsOriginalIconSign>) {
+  const api = new signModule.api(element);
+  let label: string | undefined;
+  const subscription = api.label.subscribe((value) => { label = value; });
+  onTestFinished(() => subscription.unsubscribe());
+  return () => label;
+}
+
+it('publishes the actual document type name through the native sign API label observable', async () => {
+  boundary.requestItems.mockResolvedValue({ data: [{ name: 'Article', icon: 'icon-document' }] });
+  const element = mount();
+  const label = tooltip(element);
+  expect(label()).toBe('');
+  await change('type-a');
+  expect(label()).toBe('Article');
+  expect(boundary.requestItems).toHaveBeenCalledTimes(1);
+});
+
+it('clears the old tooltip while a changed document type lookup is pending', async () => {
+  boundary.requestItems.mockResolvedValueOnce({ data: [{ name: 'Article', icon: 'icon-document' }] });
+  const element = mount();
+  const label = tooltip(element);
+  await change('type-a');
+  const next = deferred();
+  boundary.requestItems.mockReturnValue(next.promise);
+  const loading = change('type-b');
+  expect(label()).toBe('');
+  next.resolve({ data: [{ name: 'Landing page', icon: 'icon-home' }] });
+  await loading;
+  expect(label()).toBe('Landing page');
+  expect((element.render() as TemplateResult).values[1]).toBe('Landing page');
+});
+
+it('clears the tooltip when the tree item loses its document type', async () => {
+  boundary.requestItems.mockResolvedValue({ data: [{ name: 'Article', icon: 'icon-document' }] });
+  const element = mount();
+  const label = tooltip(element);
+  await change('type-a');
+  expect(label()).toBe('Article');
+  await change();
+  expect(label()).toBe('');
+});
+
+it.each([
+  { name: 'failed response', result: () => Promise.resolve({ error: new Error('lookup failed') }) },
+  { name: 'rejected request', result: () => Promise.reject(new Error('network failed')) },
+  { name: 'missing result', result: () => Promise.resolve({ data: [] }) },
+])('clears the tooltip after $name', async ({ result }) => {
+  boundary.requestItems.mockResolvedValueOnce({ data: [{ name: 'Article', icon: 'icon-document' }] })
+    .mockImplementationOnce(result);
+  const element = mount();
+  const label = tooltip(element);
+  await change('type-a');
+  expect(label()).toBe('Article');
+  await change('type-b');
+  expect(label()).toBe('');
+  expect(element.render()).toBeNull();
+});
+
+it('ignores an obsolete document type name after a recycled item returns to the first type', async () => {
+  const first = deferred();
+  boundary.requestItems.mockReturnValueOnce(first.promise)
+    .mockResolvedValueOnce({ data: [{ name: 'Landing page', icon: 'icon-home' }] })
+    .mockResolvedValueOnce({ data: [{ name: 'Updated article', icon: 'icon-document' }] });
+  const element = mount();
+  const label = tooltip(element);
+  const loading = change('type-a');
+  await change('type-b');
+  await change('type-a');
+  first.resolve({ data: [{ name: 'Old article', icon: 'icon-old-document' }] });
+  await loading;
+  expect(label()).toBe('Updated article');
+  expect((element.render() as TemplateResult).values[1]).toBe('Updated article');
+});
+
+it('ignores a pending document type name after the item is cleared', async () => {
+  const pending = deferred();
+  boundary.requestItems.mockReturnValue(pending.promise);
+  const element = mount();
+  const label = tooltip(element);
+  const loading = change('type-a');
+  await change();
+  pending.resolve({ data: [{ name: 'Article', icon: 'icon-document' }] });
+  await loading;
+  expect(label()).toBe('');
+  expect(element.render()).toBeNull();
 });

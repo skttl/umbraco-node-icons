@@ -11,7 +11,8 @@ export const onInit: UmbEntryPointOnInit = (host, registry) => {
     forEntityTypes: ['document'],
     forEntityFlags: ['NodeIcons.CustomIcon'],
     element: () => import('./original-icon-sign'),
-    meta: { iconName: 'icon-document', label: 'Original document type icon' },
+    api: () => import('./original-icon-sign'),
+    meta: { iconName: 'icon-document', label: '' },
   } satisfies UmbExtensionManifest;
   registry.register(sign);
 
