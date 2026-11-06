@@ -25,9 +25,13 @@ public sealed class NodeIconsResultFilter(IContentService contentService, IOptio
         if (result.Value is PagedViewModel<DocumentTreeItemResponseModel> page)
             page.Items = page.Items.ToArray();
 
+        if (result.Value is SubsetViewModel<DocumentTreeItemResponseModel> subset)
+            subset.Items = subset.Items.ToArray();
+
         var rows = (result.Value switch
         {
             PagedViewModel<DocumentTreeItemResponseModel> paged => paged.Items.Select(x => (x.Id, x.DocumentType, Flags: (IHasFlags)x)),
+            SubsetViewModel<DocumentTreeItemResponseModel> subsetPage => subsetPage.Items.Select(x => (x.Id, x.DocumentType, Flags: (IHasFlags)x)),
             IEnumerable<DocumentTreeItemResponseModel> items => items.Select(x => (x.Id, x.DocumentType, Flags: (IHasFlags)x)),
             IEnumerable<DocumentItemResponseModel> items => items.Select(x => (x.Id, x.DocumentType, Flags: (IHasFlags)x)),
             _ => []
