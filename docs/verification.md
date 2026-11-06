@@ -13,4 +13,3 @@ Additional authenticated integration checks against the installed 18.0.0 package
 The CI command sequence also passed locally. The shared release validation self-check covers stable/prerelease tags, complete identifier rules, package/dependency major agreement, exclusive dependency intervals and positive/negative remote-branch ancestry. Checksum-verified actionlint 1.7.12 accepted both workflows. No GitHub workflow or NuGet OIDC exchange was run.
 
 The locked client install reports six upstream npm vulnerabilities (one low, four high, one critical). Minimum-version builds report upstream NuGet advisories, including CMS, SQLite and cryptography dependencies. They remain visible. Use maintained CMS patch releases within the supported major for real deployments; no dependency overrides or audit suppression were added.
-
