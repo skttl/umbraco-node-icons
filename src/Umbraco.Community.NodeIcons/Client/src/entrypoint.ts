@@ -1,8 +1,15 @@
 import { UmbExtensionManifestInitializer } from '@umbraco-cms/backoffice/extension-api';
-import type { UmbEntryPointOnInit } from '@umbraco-cms/backoffice/extension-api';
+import type { ManifestCondition, UmbEntryPointOnInit } from '@umbraco-cms/backoffice/extension-api';
 import type { ManifestPropertyEditorUi } from '@umbraco-cms/backoffice/property-editor';
 
 export const onInit: UmbEntryPointOnInit = (host, registry) => {
+  const treeContextCondition: ManifestCondition = {
+    type: 'condition',
+    alias: 'NodeIcons.Condition.TreeContext',
+    name: 'Node Icons Tree Context Bridge',
+    api: () => import('./tree-context.condition'),
+  };
+  registry.register(treeContextCondition);
   const sign = {
     type: 'entitySign',
     kind: 'icon',
@@ -10,6 +17,7 @@ export const onInit: UmbEntryPointOnInit = (host, registry) => {
     name: 'Original Document Type Icon',
     forEntityTypes: ['document'],
     forEntityFlags: ['NodeIcons.CustomIcon'],
+    conditions: [{ alias: 'NodeIcons.Condition.TreeContext' }],
     element: () => import('./original-icon-sign'),
     api: () => import('./original-icon-sign'),
     meta: { iconName: 'icon-document', label: '' },
