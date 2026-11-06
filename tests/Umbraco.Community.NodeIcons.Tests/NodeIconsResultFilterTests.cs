@@ -60,6 +60,41 @@ public class NodeIconsResultFilterTests
     }
 
     [Fact]
+    public void LazySubsetResponsesKeepCustomIconsFlagsAndPagingMetadata()
+    {
+        var fixture = new Fixture();
+        var id = Guid.NewGuid();
+        fixture.AddContent(id, "icon-home color-blue");
+        IEnumerable<DocumentTreeItemResponseModel> Trees() =>
+            Enumerable.Range(0, 2).Select(_ =>
+            {
+                var row = Tree(id);
+                row.AddFlag("Umb.IsProtected");
+                return row;
+            });
+        var subset = new SubsetViewModel<DocumentTreeItemResponseModel>
+        {
+            TotalBefore = 3,
+            TotalAfter = 7,
+            Items = Trees()
+        };
+
+        var result = fixture.Apply(subset);
+
+        Assert.Same(subset, result.Value);
+        Assert.Equal(3, subset.TotalBefore);
+        Assert.Equal(7, subset.TotalAfter);
+        var rows = subset.Items.ToArray();
+        Assert.Equal(2, rows.Length);
+        Assert.All(rows, row =>
+        {
+            Assert.Equal("icon-home color-blue", row.DocumentType.Icon);
+            Assert.Equal(new[] { "Umb.IsProtected", "NodeIcons.CustomIcon" }, row.Flags.Select(x => x.Alias));
+        });
+        fixture.Service.Verify(x => x.GetByIds(It.Is<IEnumerable<Guid>>(ids => ids.SequenceEqual(new[] { id }))), Times.Once);
+    }
+
+    [Fact]
     public void CustomAliasUsesSavedInvariantValueAndPreservesTypeDataAndFlags()
     {
         var fixture = new Fixture(new() { PropertyAlias = "customIcon" });
