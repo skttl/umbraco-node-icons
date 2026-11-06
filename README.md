@@ -4,6 +4,8 @@ Choose a different icon for each document in Umbraco's native content tree and d
 
 [Installation, configuration and usage](docs/nuget-readme.md) · [Issues](https://github.com/skttl/umbraco-node-icons/issues)
 
+![Custom document icons in the Umbraco 18 content tree](docs/screenshots/content-tree.jpg)
+
 ## Development
 
 `main` targets Umbraco 18 and package 18.x; `v17/main` targets Umbraco 17 and package 17.x. Both use .NET 10. Umbraco 19 support has not been evaluated. Use a maintained Umbraco patch release within your supported major in real sites. Minimum-version verification deliberately uses 17.0.0, whose upstream dependency advisories should be addressed by updating the host CMS.

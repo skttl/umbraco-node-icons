@@ -4,9 +4,32 @@
   "Description": "Choose individual document icons in the native Umbraco content tree and document pickers, with an optional sign for the original document type icon.",
   "Category": "Editor Tools",
   "PackageType": "Package",
-  "LicenseTypes": ["Free"],
+  "LicenseTypes": [
+    "Free"
+  ],
   "DocumentationUrl": "https://github.com/skttl/umbraco-node-icons/blob/main/docs/nuget-readme.md",
   "IssueTrackerUrl": "https://github.com/skttl/umbraco-node-icons/issues",
-  "Tags": ["icons", "content", "backoffice"],
-  "AuthorDetails": { "Name": "Søren Kottal", "Url": "https://github.com/skttl" }
+  "Tags": [
+    "icons",
+    "content",
+    "backoffice"
+  ],
+  "AuthorDetails": {
+    "Name": "Søren Kottal",
+    "Url": "https://github.com/skttl"
+  },
+  "Screenshots": [
+    {
+      "Caption": "Umbraco 18 content tree with custom document icons, original icon signs and normal fallback icons.",
+      "ImageUrl": "https://raw.githubusercontent.com/skttl/umbraco-node-icons/main/docs/screenshots/content-tree.jpg"
+    },
+    {
+      "Caption": "Native icon and color picker in Umbraco 18.",
+      "ImageUrl": "https://raw.githubusercontent.com/skttl/umbraco-node-icons/main/docs/screenshots/icon-picker.jpg"
+    },
+    {
+      "Caption": "Node Icon Picker data type settings in Umbraco 18. Available native settings differ in Umbraco 17.",
+      "ImageUrl": "https://raw.githubusercontent.com/skttl/umbraco-node-icons/main/docs/screenshots/data-type.jpg"
+    }
+  ]
 }
