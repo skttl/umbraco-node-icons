@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/demo/">
+    <Project Path="demo/Umbraco.Community.NodeIcons.TestSite/Umbraco.Community.NodeIcons.TestSite.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Umbraco.Community.NodeIcons/Umbraco.Community.NodeIcons.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Umbraco.Community.NodeIcons.Tests/Umbraco.Community.NodeIcons.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -5,10 +5,26 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>App_Plugins/NodeIcons</StaticWebAssetBasePath>
     <Version>18.0.0</Version>
+    <PackageId>Umbraco.Community.NodeIcons</PackageId>
+    <Authors>Søren Kottal</Authors>
+    <Description>Choose individual document icons in the native Umbraco content tree and document pickers.</Description>
+    <PackageProjectUrl>https://github.com/skttl/umbraco-node-icons</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/skttl/umbraco-node-icons</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>umbraco;umbraco-marketplace;icons;content;backoffice</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Umbraco.Cms.Api.Management" Version="[18.0.0,19.0.0)" />
     <Content Remove="Client/**" />
     <None Remove="Client/**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="../../docs/nuget-readme.md" Pack="true" PackagePath="README.md" />
+    <None Include="../../icon.png" Pack="true" PackagePath="/" />
+    <None Include="../../appsettings-schema.Umbraco.Community.NodeIcons.json" Pack="true" PackagePath="/" />
+    <None Include="../../buildTransitive/Umbraco.Community.NodeIcons.targets" Pack="true" PackagePath="buildTransitive/" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://marketplace.umbraco.com/umbraco-marketplace-schema.json",
+  "Title": "NodeIcons",
+  "Description": "Choose individual document icons in the native Umbraco content tree and document pickers, with an optional sign for the original document type icon.",
+  "Category": "Editor Tools",
+  "PackageType": "Package",
+  "LicenseTypes": ["Free"],
+  "DocumentationUrl": "https://github.com/skttl/umbraco-node-icons/blob/main/docs/nuget-readme.md",
+  "IssueTrackerUrl": "https://github.com/skttl/umbraco-node-icons/issues",
+  "Tags": ["icons", "content", "backoffice"],
+  "AuthorDetails": { "Name": "Søren Kottal", "Url": "https://github.com/skttl" }
+}
