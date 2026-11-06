@@ -39,6 +39,8 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - name: Verify client
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
         working-directory: src/Umbraco.Community.NodeIcons/Client
         run: |
           npm ci

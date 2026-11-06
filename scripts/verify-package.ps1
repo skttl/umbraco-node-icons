@@ -36,6 +36,7 @@ try {
     if ($settings.properties.PropertyAlias.default -ne 'umbracoNodeIcon' -or $settings.properties.PropertyAlias.minLength -ne 1 -or $settings.properties.ShowOriginalIconAsSign.default -ne $true -or $settings.additionalProperties -ne $false) { throw 'Incorrect schema path, defaults or validation' }
     if ((Read-Entry 'buildTransitive/Umbraco.Community.NodeIcons.targets') -notmatch 'UmbracoJsonSchemaFiles Include="\$\(MSBuildThisFileDirectory\)\.\./appsettings-schema.Umbraco.Community.NodeIcons.json"') { throw 'Schema registration target missing' }
     $manifest = Read-Entry 'staticwebassets/umbraco-package.json' | ConvertFrom-Json
+    if ($manifest.version -cne $ExpectedVersion) { throw 'Incorrect manifest version' }
     if (($manifest.extensions | Where-Object { $_.js -eq '/App_Plugins/NodeIcons/node-icons.js' }).Count -ne 1) { throw 'Incorrect manifest entrypoint' }
     $entrypoint = Read-Entry 'staticwebassets/node-icons.js'
     $chunks = [regex]::Matches($entrypoint, '\./([^"'']+\.js)')
