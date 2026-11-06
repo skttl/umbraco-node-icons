@@ -30,18 +30,9 @@ pwsh -File scripts/verify-package.ps1 artifacts/Umbraco.Community.NodeIcons.17.0
 dotnet run --project demo/Umbraco.Community.NodeIcons.TestSite
 ```
 
-Before the first run, configure unattended installation with local user secrets. Umbraco 17 needs to initialize the SQLite database before the backoffice can boot:
+The default launch profile uses Development settings and installs the demo's SQLite database automatically on first run. Visit `/umbraco` at the URL printed by `dotnet run` and sign in with `nodeicons@example.test` / `NodeIcons-Demo-Only-493!` (display name **NodeIcons Demo**). These public credentials are for the local demo only; do not use them on a deployed site. They are configured in the demo's `appsettings.Development.json`.
 
-```powershell
-dotnet user-secrets init --project demo/Umbraco.Community.NodeIcons.TestSite
-dotnet user-secrets set "Umbraco:CMS:Unattended:InstallUnattended" "true" --project demo/Umbraco.Community.NodeIcons.TestSite
-dotnet user-secrets set "Umbraco:CMS:Unattended:UnattendedUserName" "Local developer" --project demo/Umbraco.Community.NodeIcons.TestSite
-dotnet user-secrets set "Umbraco:CMS:Unattended:UnattendedUserEmail" "your-email@example.com" --project demo/Umbraco.Community.NodeIcons.TestSite
-dotnet user-secrets set "Umbraco:CMS:Unattended:UnattendedUserPassword" "<choose a strong local password>" --project demo/Umbraco.Community.NodeIcons.TestSite
-dotnet run --project demo/Umbraco.Community.NodeIcons.TestSite
-```
-
-Open the demo URL printed by `dotnet run`, visit `/umbraco`, sign in with your local account, then follow the usage guide to add a data type and invariant property. The demo intentionally starts without customer document types. Do not commit passwords, databases or generated content. Use user secrets for local credentials.
+Follow the usage guide to add a data type and invariant property. The demo starts without customer document types. Keep local databases and generated content out of Git.
 
 ## Demo provenance
 
