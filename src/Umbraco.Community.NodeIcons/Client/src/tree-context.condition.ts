@@ -1,9 +1,12 @@
 import { UmbConditionBase } from '@umbraco-cms/backoffice/extension-registry';
+import { UmbDocumentTypeItemRepository } from '@umbraco-cms/backoffice/document-type';
 import { UMB_TREE_ITEM_CONTEXT } from '@umbraco-cms/backoffice/tree';
 import type { UmbConditionConfigBase, UmbConditionControllerArguments, UmbExtensionElementAndApiInitializer } from '@umbraco-cms/backoffice/extension-api';
 import type { NodeIconsOriginalIconSign } from './original-icon-sign';
 
 export class NodeIconsTreeContextCondition extends UmbConditionBase<UmbConditionConfigBase> {
+  // The item store needs a connected host; detached sign repositories cannot finish initialization.
+  #repository = new UmbDocumentTypeItemRepository(this);
   #generation = 0;
   #destroyed = false;
 
@@ -15,7 +18,7 @@ export class NodeIconsTreeContextCondition extends UmbConditionBase<UmbCondition
       await host.asPromise();
       if (this.#destroyed || generation !== this.#generation) return;
       // Overflow sign elements stay detached, so bridge context from their connected initializer.
-      (host.component as NodeIconsOriginalIconSign | undefined)?.setTreeContext(context);
+      (host.component as NodeIconsOriginalIconSign | undefined)?.setTreeContext(context, this.#repository);
     });
   }
 

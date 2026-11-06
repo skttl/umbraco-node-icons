@@ -290,3 +290,16 @@ it('ignores pending lookups and row emissions after the sign is destroyed', asyn
   expect(boundary.requestUpdate).not.toHaveBeenCalled();
   expect(boundary.requestItems).toHaveBeenCalledTimes(1);
 });
+
+it('uses the connected bridge repository when its own detached repository cannot initialize', async () => {
+  boundary.requestItems.mockRejectedValue(new Error('Detached repository cannot consume its item store'));
+  const repository = { requestItems: vi.fn().mockResolvedValue({ data: [{ name: 'Article', icon: 'icon-document' }] }) };
+  const element = mount();
+  const label = tooltip(element);
+  const context = { treeItem: new BehaviorSubject({ documentType: { unique: 'type-a' } }) };
+  element.setTreeContext(context as never, repository as never);
+  await vi.waitFor(() => expect(label()).toBe('Article'));
+  expect(renderedIcon(element)).toBe('icon-document');
+  expect(repository.requestItems).toHaveBeenCalledExactlyOnceWith(['type-a']);
+  expect(boundary.requestItems).not.toHaveBeenCalled();
+});

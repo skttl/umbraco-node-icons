@@ -3,6 +3,7 @@ import type { UmbExtensionElementAndApiInitializer } from '@umbraco-cms/backoffi
 
 const boundary = vi.hoisted(() => ({
   consume: undefined as undefined | ((context: unknown) => Promise<void>),
+  repositoryHosts: [] as unknown[],
 }));
 vi.mock('@umbraco-cms/backoffice/extension-registry', () => ({
   UmbConditionBase: class {
@@ -11,10 +12,15 @@ vi.mock('@umbraco-cms/backoffice/extension-registry', () => ({
     destroy() {}
   },
 }));
+vi.mock('@umbraco-cms/backoffice/document-type', () => ({
+  UmbDocumentTypeItemRepository: class {
+    constructor(readonly host: unknown) { boundary.repositoryHosts.push(host); }
+  },
+}));
 vi.mock('@umbraco-cms/backoffice/tree', () => ({ UMB_TREE_ITEM_CONTEXT: Symbol() }));
 import { NodeIconsTreeContextCondition } from './tree-context.condition';
 
-beforeEach(() => { boundary.consume = undefined; });
+beforeEach(() => { boundary.consume = undefined; boundary.repositoryHosts = []; });
 function deferred() {
   let resolve!: () => void;
   const promise = new Promise<void>((done) => { resolve = done; });
@@ -37,7 +43,7 @@ it('permits element creation before waiting for the initializer component', asyn
   expect(component.setTreeContext).not.toHaveBeenCalled();
   ready.resolve();
   await consuming;
-  expect(component.setTreeContext).toHaveBeenCalledExactlyOnceWith(context);
+  expect(component.setTreeContext).toHaveBeenCalledExactlyOnceWith(context, expect.any(Object));
 });
 
 it('bridges row context into an original sign that remains detached in overflow', async () => {
@@ -45,7 +51,7 @@ it('bridges row context into an original sign that remains detached in overflow'
   const context = { treeItem: {} };
   await boundary.consume?.(context);
   expect(component.isConnected).toBe(false);
-  expect(component.setTreeContext).toHaveBeenCalledExactlyOnceWith(context);
+  expect(component.setTreeContext).toHaveBeenCalledExactlyOnceWith(context, expect.any(Object));
 });
 
 it('drops an obsolete context while initializer readiness is pending', async () => {
@@ -56,14 +62,14 @@ it('drops an obsolete context while initializer readiness is pending', async () 
   const second = boundary.consume?.(current);
   ready.resolve();
   await Promise.all([first, second]);
-  expect(component.setTreeContext).toHaveBeenCalledExactlyOnceWith(current);
+  expect(component.setTreeContext).toHaveBeenCalledExactlyOnceWith(current, expect.any(Object));
 });
 
 it('forwards lost parent context so the sign clears its pending state', async () => {
   const { component } = mount();
   await boundary.consume?.({ treeItem: {} });
   await boundary.consume?.(undefined);
-  expect(component.setTreeContext).toHaveBeenLastCalledWith(undefined);
+  expect(component.setTreeContext).toHaveBeenLastCalledWith(undefined, expect.any(Object));
 });
 
 it('does not bridge after the condition is destroyed while waiting', async () => {
@@ -84,4 +90,12 @@ it('tolerates a component removed before initializer readiness resolves', async 
   ready.resolve();
   await expect(consuming).resolves.toBeUndefined();
   expect(component.setTreeContext).not.toHaveBeenCalled();
+});
+
+it('hosts the lookup repository on the connected condition instead of the detached sign', async () => {
+  const { component, condition } = mount();
+  const context = { treeItem: {} };
+  await boundary.consume?.(context);
+  expect(boundary.repositoryHosts).toEqual([condition]);
+  expect(component.setTreeContext.mock.calls[0][1].host).toBe(condition);
 });

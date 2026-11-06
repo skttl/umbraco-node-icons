@@ -20,7 +20,7 @@ export class NodeIconsOriginalIconSign extends UmbLitElement {
     this.consumeContext(UMB_TREE_ITEM_CONTEXT, (context) => this.setTreeContext(context));
   }
 
-  setTreeContext(context: UmbTreeItemContext | undefined) {
+  setTreeContext(context: UmbTreeItemContext | undefined, repository = this.#repository) {
     if (this.#context === context) return;
     this.#context = context;
     this.observe(context?.treeItem, async (item) => {
@@ -31,7 +31,7 @@ export class NodeIconsOriginalIconSign extends UmbLitElement {
       this.requestUpdate();
       if (!type) return;
       try {
-        const { data, error } = await this.#repository.requestItems([type]);
+        const { data, error } = await repository.requestItems([type]);
         if (request !== this.#request || error) return;
         this.#icon = data?.[0]?.icon;
         this.#name.setValue(data?.[0]?.name ?? '');
