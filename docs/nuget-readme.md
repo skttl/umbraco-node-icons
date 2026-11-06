@@ -23,6 +23,22 @@ For example, give a News document type the usual `icon-document` icon, then sele
 
 Any property editor can supply an ordinary Umbraco icon string through the configured property. The editor itself does not decide which property controls the icon.
 
+## Screenshots
+
+These screenshots were captured in Umbraco 18. The native picker follows your CMS version; its available settings differ in Umbraco 17.
+
+Custom document icons retain the document type's original symbol as a sign. Documents without a custom icon use the normal document type icon.
+
+![Content tree with custom document icons and original icon signs](https://raw.githubusercontent.com/skttl/umbraco-node-icons/main/docs/screenshots/content-tree.jpg)
+
+Choose a symbol and color with the native icon picker.
+
+![Native icon picker in Umbraco 18](https://raw.githubusercontent.com/skttl/umbraco-node-icons/main/docs/screenshots/icon-picker.jpg)
+
+Select Node Icon Picker when configuring the data type. Keep the document property invariant, including on multilingual document types.
+
+![Node Icon Picker data type settings in Umbraco 18](https://raw.githubusercontent.com/skttl/umbraco-node-icons/main/docs/screenshots/data-type.jpg)
+
 ## Configuration
 
 Defaults work without configuration. To change them, add this to `appsettings.json`:
