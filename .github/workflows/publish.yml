@@ -1,0 +1,68 @@
+name: Publish
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Validate release tag and ancestry
+        id: release
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          git fetch origin '+refs/heads/main:refs/remotes/origin/main' '+refs/heads/v17/main:refs/remotes/origin/v17/main'
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to fetch release branch history.' }
+          $release = ./scripts/validate-release.ps1 -Tag $env:RELEASE_TAG
+          "version=$($release.Version)" >> $env:GITHUB_OUTPUT
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.13.0'
+          package-manager-cache: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Verify client
+        working-directory: src/Umbraco.Community.NodeIcons/Client
+        run: |
+          npm ci
+          npm test
+          npm run typecheck
+          npm run build
+      - name: Check release validation
+        shell: pwsh
+        run: ./scripts/test-release-validation.ps1
+      - run: dotnet restore Umbraco.Community.NodeIcons.slnx
+      - name: Build, test and pack release version
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          dotnet build Umbraco.Community.NodeIcons.slnx -c Release --no-restore -p:Version=$env:RELEASE_VERSION
+          if ($LASTEXITCODE -ne 0) { throw 'Build failed.' }
+          dotnet test tests/Umbraco.Community.NodeIcons.Tests -c Release --no-build
+          if ($LASTEXITCODE -ne 0) { throw 'Tests failed.' }
+          dotnet pack src/Umbraco.Community.NodeIcons -c Release --no-build -p:Version=$env:RELEASE_VERSION -o artifacts
+          if ($LASTEXITCODE -ne 0) { throw 'Pack failed.' }
+          ./scripts/verify-package.ps1 "artifacts/Umbraco.Community.NodeIcons.$env:RELEASE_VERSION.nupkg" $env:RELEASE_VERSION
+      - name: NuGet login with OIDC
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+      - name: Publish verified package
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: dotnet nuget push "artifacts/Umbraco.Community.NodeIcons.$env:RELEASE_VERSION.nupkg" --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json

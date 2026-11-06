@@ -1,0 +1,40 @@
+name: CI
+on:
+  push:
+    branches: [main, v17/main]
+  pull_request:
+    branches: [main, v17/main]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24.13.0'
+          package-manager-cache: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - name: Verify client
+        working-directory: src/Umbraco.Community.NodeIcons/Client
+        run: |
+          npm ci
+          npm test
+          npm run typecheck
+          npm run build
+      - name: Check release validation
+        shell: pwsh
+        run: ./scripts/test-release-validation.ps1
+      - run: dotnet restore Umbraco.Community.NodeIcons.slnx
+      - run: dotnet build Umbraco.Community.NodeIcons.slnx -c Release --no-restore
+      - run: dotnet test tests/Umbraco.Community.NodeIcons.Tests -c Release --no-build
+      - run: dotnet pack src/Umbraco.Community.NodeIcons -c Release --no-build -o artifacts
+      - name: Verify package
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content src/Umbraco.Community.NodeIcons/Umbraco.Community.NodeIcons.csproj
+          $version = [string]$project.Project.PropertyGroup.Version
+          ./scripts/verify-package.ps1 "artifacts/Umbraco.Community.NodeIcons.$version.nupkg" $version

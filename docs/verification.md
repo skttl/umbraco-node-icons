@@ -8,4 +8,9 @@ The package verification script accepts the complete artifact and rejects a miss
 
 Native browser component checks also passed all 15 cases against the separately installed NuGet consumer, with no browser console errors or warnings. These covered the production entrypoint and dynamic chunk including the registered property editor manifest, native icon-picker symbol/color rendering, native tree sign composition and preservation of other signs. These checks use recorded transport and native refresh events. Actual editor Save-button testing remains outstanding following an OAuth login failure in the test browser. Selected references display only the main icon, as documented.
 
-Minimum-version builds report upstream NuGet advisories, including CMS, SQLite and cryptography dependencies. They remain visible. Use maintained CMS patch releases within the supported major for real deployments; no dependency overrides or audit suppression were added.
+Additional authenticated integration checks against the installed 18.0.0 package passed 36 assertions using the normal HTTPS development certificate and disposable content. These covered Management API saves followed by tree/item reads, icon/sign behavior, fallbacks, color-only changes, paging, preserved flags and unchanged stored document type icons. This verifies the real save API; clicking Save in the actual content editor remains unverified.
+
+The CI command sequence also passed locally. The shared release validation self-check covers stable/prerelease tags, complete identifier rules, package/dependency major agreement, exclusive dependency intervals and positive/negative remote-branch ancestry. Checksum-verified actionlint 1.7.12 accepted both workflows. No GitHub workflow or NuGet OIDC exchange was run.
+
+The locked client install reports six upstream npm vulnerabilities (one low, four high, one critical). Minimum-version builds report upstream NuGet advisories, including CMS, SQLite and cryptography dependencies. They remain visible. Use maintained CMS patch releases within the supported major for real deployments; no dependency overrides or audit suppression were added.
+
