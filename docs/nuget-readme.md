@@ -27,7 +27,7 @@ Any property editor can supply an ordinary Umbraco icon string through the confi
 
 These screenshots were captured in Umbraco 18. The native picker follows your CMS version; its available settings differ in Umbraco 17.
 
-Custom document icons retain the document type's original symbol as a sign. Documents without a custom icon use the normal document type icon.
+Custom document icons retain the document type's original symbol as a sign. Hover over the sign to see the document type's name. Documents without a custom icon use the normal document type icon.
 
 ![Content tree with custom document icons and original icon signs](https://raw.githubusercontent.com/skttl/umbraco-node-icons/main/docs/screenshots/content-tree.jpg)
 
