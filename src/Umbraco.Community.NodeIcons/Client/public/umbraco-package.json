@@ -1,0 +1,10 @@
+{
+  "$schema": "../node_modules/@umbraco-cms/backoffice/umbraco-package-schema.json",
+  "name": "Node Icons",
+  "extensions": [{
+    "type": "backofficeEntryPoint",
+    "alias": "NodeIcons.EntryPoint",
+    "name": "Node Icons Entry Point",
+    "js": "/App_Plugins/NodeIcons/node-icons.js"
+  }]
+}
