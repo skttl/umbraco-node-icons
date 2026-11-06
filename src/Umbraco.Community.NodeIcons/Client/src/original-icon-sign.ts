@@ -1,6 +1,7 @@
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
 import { html } from '@umbraco-cms/backoffice/external/lit';
 import { UMB_TREE_ITEM_CONTEXT } from '@umbraco-cms/backoffice/tree';
+import type { UmbTreeItemContext } from '@umbraco-cms/backoffice/tree';
 import { UmbDocumentTypeItemRepository } from '@umbraco-cms/backoffice/document-type';
 import { UmbStringState } from '@umbraco-cms/backoffice/observable-api';
 import type { UmbEntitySignApi } from '@umbraco-cms/backoffice/entity-sign';
@@ -11,29 +12,39 @@ export class NodeIconsOriginalIconSign extends UmbLitElement {
   #icon?: string;
   #request = 0;
   #name = new UmbStringState('');
+  #context?: UmbTreeItemContext;
   readonly label = this.#name.asObservable();
 
   constructor() {
     super();
-    this.consumeContext(UMB_TREE_ITEM_CONTEXT, (context) => {
-      this.observe(context?.treeItem, async (item) => {
-        const type = (item as UmbDocumentTreeItemModel | undefined)?.documentType?.unique;
-        const request = ++this.#request;
-        this.#icon = undefined;
-        this.#name.setValue('');
+    this.consumeContext(UMB_TREE_ITEM_CONTEXT, (context) => this.setTreeContext(context));
+  }
+
+  setTreeContext(context: UmbTreeItemContext | undefined) {
+    if (this.#context === context) return;
+    this.#context = context;
+    this.observe(context?.treeItem, async (item) => {
+      const type = (item as UmbDocumentTreeItemModel | undefined)?.documentType?.unique;
+      const request = ++this.#request;
+      this.#icon = undefined;
+      this.#name.setValue('');
+      this.requestUpdate();
+      if (!type) return;
+      try {
+        const { data, error } = await this.#repository.requestItems([type]);
+        if (request !== this.#request || error) return;
+        this.#icon = data?.[0]?.icon;
+        this.#name.setValue(data?.[0]?.name ?? '');
         this.requestUpdate();
-        if (!type) return;
-        try {
-          const { data, error } = await this.#repository.requestItems([type]);
-          if (request !== this.#request || error) return;
-          this.#icon = data?.[0]?.icon;
-          this.#name.setValue(data?.[0]?.name ?? '');
-          this.requestUpdate();
-        } catch {
-          // A missing original icon must not interrupt the native tree.
-        }
-      }, 'node-icons-tree-item');
-    });
+      } catch {
+        // A missing original icon must not interrupt the native tree.
+      }
+    }, 'node-icons-tree-item');
+  }
+
+  override destroy() {
+    this.#request++;
+    super.destroy();
   }
 
   override render() {

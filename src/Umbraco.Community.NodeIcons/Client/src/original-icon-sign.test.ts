@@ -1,16 +1,25 @@
 import { beforeEach, expect, it, onTestFinished, vi } from 'vitest';
+import { BehaviorSubject } from '@umbraco-cms/backoffice/external/rxjs';
 import type { TemplateResult } from '@umbraco-cms/backoffice/external/lit';
 
 const boundary = vi.hoisted(() => ({
   context: undefined as undefined | ((context: unknown) => void),
   item: undefined as undefined | ((item: unknown) => Promise<void>),
-  requestItems: vi.fn(),
+  requestItems: vi.fn(), requestUpdate: vi.fn(),
 }));
 vi.mock('@umbraco-cms/backoffice/lit-element', () => ({
   UmbLitElement: class {
     consumeContext(_token: unknown, callback: typeof boundary.context) { boundary.context = callback; }
-    observe(_source: unknown, callback: typeof boundary.item) { boundary.item = callback; }
-    requestUpdate() {}
+    #observers = new Map<unknown, { unsubscribe(): void }>();
+    observe(source: { subscribe?: (callback: unknown) => { unsubscribe(): void } } | undefined,
+      callback: typeof boundary.item, alias: unknown) {
+      boundary.item = callback;
+      this.#observers.get(alias)?.unsubscribe();
+      if (source?.subscribe) this.#observers.set(alias, source.subscribe(callback));
+      else if (!source) callback?.(undefined);
+    }
+    requestUpdate() { boundary.requestUpdate(); }
+    destroy() { this.#observers.forEach((observer) => observer.unsubscribe()); }
   },
 }));
 vi.mock('@umbraco-cms/backoffice/tree', () => ({ UMB_TREE_ITEM_CONTEXT: Symbol() }));
@@ -24,7 +33,7 @@ const { NodeIconsOriginalIconSign } = signModule;
 beforeEach(() => {
   boundary.context = undefined;
   boundary.item = undefined;
-  boundary.requestItems.mockReset();
+  boundary.requestItems.mockReset(); boundary.requestUpdate.mockClear();
 });
 
 function mount() {
@@ -216,4 +225,68 @@ it('ignores a pending document type name after the item is cleared', async () =>
   await loading;
   expect(label()).toBe('');
   expect(element.render()).toBeNull();
+});
+
+it('observes a detached sign context and replaces its previous row subscription', async () => {
+  boundary.requestItems.mockImplementation(([type]) => Promise.resolve({ data: [{ name: type, icon: 'icon-' + type }] }));
+  const element = mount();
+  const label = tooltip(element);
+  const first = new BehaviorSubject({ documentType: { unique: 'first' } });
+  const second = new BehaviorSubject({ documentType: { unique: 'second' } });
+  expect(element.setTreeContext).toBeTypeOf('function');
+  element.setTreeContext({ treeItem: first } as never);
+  await vi.waitFor(() => expect(label()).toBe('first'));
+  element.setTreeContext({ treeItem: second } as never);
+  await vi.waitFor(() => expect(label()).toBe('second'));
+  first.next({ documentType: { unique: 'obsolete' } });
+  expect(boundary.requestItems).toHaveBeenCalledTimes(2);
+  expect(label()).toBe('second');
+});
+
+it('clears the detached sign when its context is removed without another item emission', async () => {
+  const pending = deferred();
+  boundary.requestItems.mockReturnValue(pending.promise);
+  const element = mount();
+  const label = tooltip(element);
+  expect(element.setTreeContext).toBeTypeOf('function');
+  const source = new BehaviorSubject({ documentType: { unique: 'type-a' } });
+  element.setTreeContext({ treeItem: source } as never);
+  element.setTreeContext(undefined);
+  pending.resolve({ data: [{ name: 'Article', icon: 'icon-document' }] });
+  await Promise.resolve();
+  expect(label()).toBe('');
+  expect(element.render()).toBeNull();
+  source.next({ documentType: { unique: 'obsolete' } });
+  expect(boundary.requestItems).toHaveBeenCalledTimes(1);
+});
+
+it('does not repeat the lookup when the connected preview receives the bridged context again', async () => {
+  boundary.requestItems.mockResolvedValue({ data: [{ name: 'Article', icon: 'icon-document' }] });
+  const element = mount();
+  const label = tooltip(element);
+  expect(element.setTreeContext).toBeTypeOf('function');
+  const context = { treeItem: new BehaviorSubject({ documentType: { unique: 'type-a' } }) };
+  element.setTreeContext(context as never);
+  await vi.waitFor(() => expect(label()).toBe('Article'));
+  element.setTreeContext(context as never);
+  expect(boundary.requestItems).toHaveBeenCalledTimes(1);
+});
+
+it('ignores pending lookups and row emissions after the sign is destroyed', async () => {
+  const pending = deferred();
+  boundary.requestItems.mockReturnValue(pending.promise);
+  const element = mount();
+  const label = tooltip(element);
+  expect(element.setTreeContext).toBeTypeOf('function');
+  const source = new BehaviorSubject({ documentType: { unique: 'type-a' } });
+  element.setTreeContext({ treeItem: source } as never);
+  element.destroy();
+  boundary.requestUpdate.mockClear();
+  pending.resolve({ data: [{ name: 'Article', icon: 'icon-document' }] });
+  await Promise.resolve();
+  source.next({ documentType: { unique: 'obsolete' } });
+  expect(label()).toBe('');
+  expect(element.render()).toBeNull();
+  expect(boundary.requestUpdate).not.toHaveBeenCalled();
+  expect(boundary.requestItems).toHaveBeenCalledTimes(1);
 });

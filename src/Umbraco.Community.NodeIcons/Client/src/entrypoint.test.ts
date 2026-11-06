@@ -17,6 +17,7 @@ it('registers a document-only sign for the server custom-icon flag', () => {
   expect(registry.register).toHaveBeenCalledWith(expect.objectContaining({
     type: 'entitySign', kind: 'icon', forEntityTypes: ['document'],
     forEntityFlags: ['NodeIcons.CustomIcon'], element: expect.any(Function), api: expect.any(Function),
+    conditions: [{ alias: 'NodeIcons.Condition.TreeContext' }],
   }));
 });
 
@@ -39,9 +40,9 @@ it('clones the available native picker with its settings and plain-string schema
       ] } },
   };
   notify(false, { manifest: native });
-  expect(registry.register).toHaveBeenCalledTimes(1);
+  expect(registry.register).toHaveBeenCalledTimes(2);
   notify(true, { manifest: native });
-  const picker = registry.register.mock.calls[1][0];
+  const picker = registry.register.mock.calls.find(([manifest]) => manifest.type === 'propertyEditorUi')?.[0];
   expect(picker).toMatchObject({
     type: 'propertyEditorUi', alias: 'NodeIcons.PropertyEditorUi.IconPicker',
     meta: { label: 'Node Icon Picker', propertyEditorSchemaAlias: 'Umbraco.Plain.String' },
@@ -49,4 +50,12 @@ it('clones the available native picker with its settings and plain-string schema
   expect(picker.element).toBe(native.element);
   expect(picker.meta.settings).toBe(native.meta.settings);
   expect(native.meta).not.toHaveProperty('propertyEditorSchemaAlias');
+});
+
+it('registers the context bridge condition for the original-icon sign', () => {
+  const registry = { register: vi.fn() };
+  (onInit as UmbEntryPointOnInit)({} as never, registry as never);
+  expect(registry.register).toHaveBeenCalledWith(expect.objectContaining({
+    type: 'condition', alias: 'NodeIcons.Condition.TreeContext', api: expect.any(Function),
+  }));
 });
