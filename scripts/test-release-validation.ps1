@@ -46,3 +46,5 @@ try {
 } finally {
     Remove-Item -LiteralPath $root -Recurse -Force
 }
+# Expected git rejections must not become the CLI exit code after all assertions pass.
+exit 0
