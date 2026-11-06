@@ -6,7 +6,7 @@ Choose a different icon for each document in Umbraco's native content tree and d
 
 ## Development
 
-`main` targets Umbraco 18 and package 18.x; `v17/main` targets Umbraco 17 and package 17.x. Both use .NET 10. Umbraco 19 support has not been evaluated. Use a maintained Umbraco patch release within your supported major in real sites. Minimum-version verification deliberately uses 18.0.0, whose upstream dependency advisories should be addressed by updating the host CMS.
+`main` targets Umbraco 18 and package 18.x; `v17/main` targets Umbraco 17 and package 17.x. Both use .NET 10. Umbraco 19 support has not been evaluated. Use a maintained Umbraco patch release within your supported major in real sites. Minimum-version verification deliberately uses 17.0.0, whose upstream dependency advisories should be addressed by updating the host CMS.
 
 Install .NET SDK 10 and Node.js 24.13 or newer with npm 11 or newer. NuGet consumers do not need Node.js.
 
@@ -26,11 +26,11 @@ npm --prefix src/Umbraco.Community.NodeIcons/Client run build
 dotnet build Umbraco.Community.NodeIcons.slnx -c Release
 dotnet test tests/Umbraco.Community.NodeIcons.Tests -c Release --no-build
 dotnet pack src/Umbraco.Community.NodeIcons -c Release --no-build -o artifacts
-pwsh -File scripts/verify-package.ps1 artifacts/Umbraco.Community.NodeIcons.18.0.0.nupkg 18.0.0
+pwsh -File scripts/verify-package.ps1 artifacts/Umbraco.Community.NodeIcons.17.0.0.nupkg 17.0.0
 dotnet run --project demo/Umbraco.Community.NodeIcons.TestSite
 ```
 
-Before the first run, configure unattended installation with local user secrets. Umbraco 18 needs to initialize the SQLite database before the backoffice can boot:
+Before the first run, configure unattended installation with local user secrets. Umbraco 17 needs to initialize the SQLite database before the backoffice can boot:
 
 ```powershell
 dotnet user-secrets init --project demo/Umbraco.Community.NodeIcons.TestSite
@@ -45,11 +45,11 @@ Open the demo URL printed by `dotnet run`, visit `/umbraco`, sign in with your l
 
 ## Demo provenance
 
-The demo was generated with official `Umbraco.Templates` 18.0.0, after inspecting its help and a dry run. The template fixes the framework to net10.0 and does not expose a framework parameter. Its generated ICU, runtime and development settings are retained.
+The demo was generated with official `Umbraco.Templates` 17.0.0, after inspecting its help and a dry run. The template fixes the framework to net10.0 and does not expose a framework parameter. Its generated ICU, runtime and development settings are retained.
 
 ```powershell
-dotnet new install Umbraco.Templates::18.0.0 --debug:custom-hive <isolated-hive>
-dotnet new umbraco --debug:custom-hive <isolated-hive> --name Umbraco.Community.NodeIcons.TestSite --output demo/Umbraco.Community.NodeIcons.TestSite --development-database-type SQLite --package-management PerProject --no-restore --no-update-check
+dotnet new install Umbraco.Templates::17.0.0 --debug:custom-hive <isolated-hive>
+dotnet new umbraco --debug:custom-hive <isolated-hive> --name Umbraco.Community.NodeIcons.TestSite --output demo/Umbraco.Community.NodeIcons.TestSite --development-database-type SQLite --no-restore --no-update-check
 ```
 
 The 17.0.0 template uses per-project references by default; omit `--package-management PerProject` there.
@@ -58,9 +58,8 @@ The 17.0.0 template uses per-project references by default; omit `--package-mana
 
 Build and verify the package before creating a stable or prerelease version tag. Package majors follow Umbraco majors and dependencies exclude the next major. Releases use NuGet trusted publishing with GitHub OIDC. Configure a GitHub `release` environment and `NUGET_USER` secret containing the NuGet account name. Configure the NuGet trust policy for `skttl/umbraco-node-icons`, workflow `publish.yml`, environment `release`, and package ownership. No permanent NuGet API key is needed. The trust policy must use the exact filename `publish.yml` (not the display name or `.github/workflows/` path), repository owner `skttl`, repository `umbraco-node-icons`, and environment `release`. The NuGet account must own the package. `NUGET_USER` is the profile username, not an email address. The publishing job grants `id-token: write` and `contents: read`; CI grants only `contents: read`.
 
-CI runs locked client installation, tests, type checking and build, followed by solution restore/build, server tests, pack and the shared package verifier. Publishing repeats these checks before exchanging OIDC credentials immediately before pushing. Tags must be complete stable or prerelease SemVer such as `v18.0.0`, `v18.0.1-rc1` or `v18.0.1-beta.2`; numeric prerelease identifiers cannot have leading zeros. Build metadata is outside this release tag format. Only the leading `v` is removed. Tag major, project package major and the exclusive Umbraco dependency interval must agree. The tagged commit must be an ancestor of the fetched `origin/main` (18) or `origin/v17/main` (17) tip. Both remote version branches must exist before this workflow runs. `scripts/test-release-validation.ps1` exercises acceptance and rejection without contacting a remote.
+CI runs locked client installation, tests, type checking and build, followed by solution restore/build, server tests, pack and the shared package verifier. Publishing repeats these checks before exchanging OIDC credentials immediately before pushing. Tags must be complete stable or prerelease SemVer such as `v17.0.0`, `v17.0.1-rc1` or `v17.0.1-beta.2`; numeric prerelease identifiers cannot have leading zeros. Build metadata is outside this release tag format. Only the leading `v` is removed. Tag major, project package major and the exclusive Umbraco dependency interval must agree. The tagged commit must be an ancestor of the fetched `origin/main` (18) or `origin/v17/main` (17) tip. Only the expected remote version branch is fetched; each major releases independently. `scripts/test-release-validation.ps1` exercises acceptance and rejection without contacting a remote.
 
 Before first publication, run the Release pack command above and `scripts/verify-package.ps1`, then install the artifact in a separate official-template site at the declared CMS minimum. Configure the external environment and trust policy before authorizing any workflow publication. Creating a tag and publishing require an explicit release decision.
 
 MIT license. Artwork uses a tree with a star node in the package palette.
-

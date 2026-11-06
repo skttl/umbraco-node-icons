@@ -4,7 +4,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <StaticWebAssetBasePath>App_Plugins/NodeIcons</StaticWebAssetBasePath>
-    <Version>18.0.0</Version>
+    <Version>17.0.0</Version>
     <PackageId>Umbraco.Community.NodeIcons</PackageId>
     <Authors>Søren Kottal</Authors>
     <Description>Choose individual document icons in the native Umbraco content tree and document pickers.</Description>
@@ -17,7 +17,7 @@
     <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Umbraco.Cms.Api.Management" Version="[18.0.0,19.0.0)" />
+    <PackageReference Include="Umbraco.Cms.Api.Management" Version="[17.0.0,18.0.0)" />
     <Content Remove="Client/**" />
     <None Remove="Client/**" />
   </ItemGroup>

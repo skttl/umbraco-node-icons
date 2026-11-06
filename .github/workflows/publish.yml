@@ -21,7 +21,13 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          git fetch origin '+refs/heads/main:refs/remotes/origin/main' '+refs/heads/v17/main:refs/remotes/origin/v17/main'
+          [xml]$project = Get-Content src/Umbraco.Community.NodeIcons/Umbraco.Community.NodeIcons.csproj
+          $branch = switch -Regex ([string]$project.Project.PropertyGroup.Version) {
+            '^18\.' { 'main' }
+            '^17\.' { 'v17/main' }
+            default { throw 'Unsupported project package major.' }
+          }
+          git fetch origin "+refs/heads/${branch}:refs/remotes/origin/$branch"
           if ($LASTEXITCODE -ne 0) { throw 'Unable to fetch release branch history.' }
           $release = ./scripts/validate-release.ps1 -Tag $env:RELEASE_TAG
           "version=$($release.Version)" >> $env:GITHUB_OUTPUT

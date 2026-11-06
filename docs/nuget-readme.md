@@ -4,10 +4,10 @@ Choose individual document icons in the native content tree and document picker 
 
 ## Compatibility and installation
 
-Use NodeIcons 18.x with Umbraco 18, or NodeIcons 17.x with Umbraco 17. Both require .NET 10. Use the latest maintained patch release of your CMS major. The package supports the interval `[18.0.0,19.0.0)` on this branch; minimum-version verification uses 18.0.0. Umbraco 19 compatibility has not been evaluated.
+Use NodeIcons 18.x with Umbraco 18, or NodeIcons 17.x with Umbraco 17. Both require .NET 10. Use the latest maintained patch release of your CMS major. The package supports the interval `[17.0.0,18.0.0)` on this branch; minimum-version verification uses 17.0.0. Umbraco 19 compatibility has not been evaluated.
 
 ```shell
-dotnet add package Umbraco.Community.NodeIcons --version 18.0.0
+dotnet add package Umbraco.Community.NodeIcons --version 17.0.0
 ```
 
 Rebuild and restart the site. Umbraco discovers the composer and backoffice extensions automatically; no registration code or Node.js installation is required. The package adds appsettings schema support during build.

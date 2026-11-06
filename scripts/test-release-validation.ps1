@@ -35,8 +35,14 @@ try {
     Check 'v18.0.0' $false
     Check 'v17.0.0' $false 17
     Check 'v18.0.0' $true 18 '' 'HEAD~1'
+    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/main', 'HEAD')
+    Check 'v18.0.0' $true
+    Check 'v17.0.0' $false 17
+    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/main', 'HEAD~1')
+    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/v17/main', 'HEAD')
+    Check 'v17.0.0' $true 17
+    Check 'v18.0.0' $false
     Write-Host 'Release validation self-check passed (valid tags, invalid identifiers, majors, intervals and ancestry).'
 } finally {
     Remove-Item -LiteralPath $root -Recurse -Force
 }
-

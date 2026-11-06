@@ -1,4 +1,3 @@
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.CreateUmbracoBuilder()
@@ -8,7 +7,6 @@ builder.CreateUmbracoBuilder()
     .Build();
 
 WebApplication app = builder.Build();
-
 
 await app.BootUmbracoAsync();
 
