@@ -1,5 +1,5 @@
 import { UmbLitElement } from '@umbraco-cms/backoffice/lit-element';
-import { html } from '@umbraco-cms/backoffice/external/lit';
+import { css, html } from '@umbraco-cms/backoffice/external/lit';
 import { UMB_TREE_ITEM_CONTEXT } from '@umbraco-cms/backoffice/tree';
 import type { UmbTreeItemContext } from '@umbraco-cms/backoffice/tree';
 import { UmbDocumentTypeItemRepository } from '@umbraco-cms/backoffice/document-type';
@@ -52,6 +52,22 @@ export class NodeIconsOriginalIconSign extends UmbLitElement {
       ? html`<umb-icon name=${this.#icon} role="img" aria-label=${this.#name.getValue()}></umb-icon>`
       : null;
   }
+
+  static override styles = css`
+    umb-icon {
+      filter: drop-shadow(-1px 0 0 var(--umb-sign-bundle-bg)) drop-shadow(0 -1px 0 var(--umb-sign-bundle-bg))
+        drop-shadow(0 1px 0 var(--umb-sign-bundle-bg));
+    }
+
+    umb-icon::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      border-radius: 50%;
+      inset: 2px;
+      background-color: var(--umb-sign-bundle-bg);
+    }
+  `;
 }
 
 customElements.define('node-icons-original-icon-sign', NodeIconsOriginalIconSign);
