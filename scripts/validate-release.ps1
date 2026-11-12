@@ -22,7 +22,7 @@ if ($dependency.Count -ne 1 -or $dependency[0].Version -cne $expectedInterval) {
     throw "Expected Umbraco dependency interval $expectedInterval."
 }
 $branch = switch ($major) {
-    18 { 'main' }
+    18 { 'v18/main' }
     17 { 'v17/main' }
     default { throw "Unsupported release major: $major" }
 }

@@ -23,7 +23,7 @@ jobs:
         run: |
           [xml]$project = Get-Content src/Umbraco.Community.NodeIcons/Umbraco.Community.NodeIcons.csproj
           $branch = switch -Regex ([string]$project.Project.PropertyGroup.Version) {
-            '^18\.' { 'main' }
+            '^18\.' { 'v18/main' }
             '^17\.' { 'v17/main' }
             default { throw 'Unsupported project package major.' }
           }

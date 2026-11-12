@@ -23,7 +23,7 @@ function Check([string] $Tag, [bool] $Accept, [int] $Major = 18, [string] $Inter
 try {
     InvokeFixtureGit @('init', '--quiet')
     InvokeFixtureGit @('-c', 'user.name=Release test', '-c', 'user.email=test@example.invalid', 'commit', '--allow-empty', '-m', 'base', '--quiet')
-    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/main', 'HEAD')
+    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/v18/main', 'HEAD')
     InvokeFixtureGit @('update-ref', 'refs/remotes/origin/v17/main', 'HEAD')
     foreach ($tag in @('v18.0.0', 'v18.1.2-rc1', 'v18.0.0-beta.2', 'v18.0.0-0', 'v18.0.0-01a')) { Check $tag $true }
     Check 'v17.0.0-rc.1' $true 17
@@ -35,10 +35,10 @@ try {
     Check 'v18.0.0' $false
     Check 'v17.0.0' $false 17
     Check 'v18.0.0' $true 18 '' 'HEAD~1'
-    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/main', 'HEAD')
+    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/v18/main', 'HEAD')
     Check 'v18.0.0' $true
     Check 'v17.0.0' $false 17
-    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/main', 'HEAD~1')
+    InvokeFixtureGit @('update-ref', 'refs/remotes/origin/v18/main', 'HEAD~1')
     InvokeFixtureGit @('update-ref', 'refs/remotes/origin/v17/main', 'HEAD')
     Check 'v17.0.0' $true 17
     Check 'v18.0.0' $false
